@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fc;
+        }
+        .container {
+            padding-top: 50px;
+        }
+        .card {
+            transition: transform 0.3s ease-in-out;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .card-text {
+            font-size: 1.1rem;
+            color: #555;
+        }
+        .img-fluid {
+            border-radius: 15px;
+            max-width: 100%;
+            height: auto;
+        }
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            color: #4A90E2;
+            margin-bottom: 30px;
+        }
+        .card-body {
+            background-color: #ffffff;
+            padding: 20px;
+        }
+        .col-md-4 {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Patient Information</h1>
+                <div class="card mb-3 p-3 bg-light shadow rounded border">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                            <img
+                            src="https://via.placeholder.com/150"
+                            class="img-fluid"
+                            alt="Patient Image"
+                            />
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title" id="patient-name">Name</h5>
+                                <p class="card-text" id="age">Age</p>
+                                <p class="card-text" id="email">Email</p>
+                                <div class="container-fluid text-end">
+                                    <button class="btn btn-success"><i class="bi bi-pencil-square"></i> Edit Information</button>
+                                </div>
+                            </div>
+                        </div>  
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let patientName = document.getElementById("patient-name");
+        let age = document.getElementById("age");
+        let email = document.getElementById("email");
+        
+        // Extract the userId from the query string
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const userId = urlParams.get("userId");
+
+        if (userId) {
+            // Prepare the API URL
+            const apiUrl = 'https://bptby3teb1.execute-api.us-east-1.amazonaws.com/prod/get-user-s';
+
+            // Create the request body with the userId
+            const requestBody = JSON.stringify({ userId });
+
+            // Format the body as required
+            const formattedObject = {
+                "body": requestBody
+            };
+
+            console.log(formattedObject); // Log the formatted object
+
+            // Fetch the specific user data using a POST request
+            fetch(apiUrl, {
+                method: "POST", // Use POST method
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formattedObject), // Send the formatted object
+            })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok " + response.statusText);
+                }
+                return response.json(); // Parse JSON response
+            })
+            .then((data) => {
+                // Log the response data to check the structure
+                console.log("API Response:", data);
+
+                // Check for successful data response
+                if (data && data.body) {
+                    const parsedBody = JSON.parse(data.body); // Parse the body field
+
+                    if (parsedBody && parsedBody.data) {
+                        const user = parsedBody.data; // Extract user data from "data"
+                        patientName.textContent = user.username;
+                        age.textContent = "Age: " + user.age;
+                        email.textContent = "Email: " + user.email;
+                    } else {
+                        console.error("No user data found");
+                        alert("Failed to retrieve user data.");
+                    }
+                } else {
+                    console.error("API response format is unexpected.");
+                    alert("Failed to load user data. Please try again later.");
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+                alert("Failed to load user data. Please try again later.");
+            });
+        } else {
+            alert("No userId provided in the query string.");
+        }
+    </script>
+</body>
+</html>
